@@ -1,19 +1,16 @@
 {
   "name": "microtsm-vue",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
-  "main": "./dist/counter.umd.cjs",
-  "module": "./dist/counter.js",
-  "types": "./index.d.ts",
+  "module": "./dist/microtsm-vue.js",
+  "types": "./dist/microtsm-vue.d.ts",
   "exports": {
     "types": "./index.d.ts",
-    "import": "./dist/counter.js",
-    "require": "./dist/counter.umd.cjs"
+    "import": "./dist/microtsm-vue.js"
   },
   "scripts": {
     "dev": "vite",
@@ -21,6 +18,11 @@
   },
   "devDependencies": {
     "typescript": "~5.7.3",
-    "vite": "^6.1.1"
+    "vite": "^6.1.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vue": "^3.5.14"
+  },
+  "dependencies": {
+    "css.escape": "^1.5.1"
   }
 }
