@@ -1,10 +1,8 @@
 import {App, CreateAppFunction} from "vue";
-import "css.escape";
 
 /**
  * Interface representing the Vue component options for the micro app.
- * It extends Vue's Component interface with an optional 'el' property,
- * and allows additional Vue options.
+ * It allows additional Vue options and an optional 'el' property.
  *
  * @interface MicroVueAppOptions
  */
@@ -32,6 +30,11 @@ export interface MicroAppProps {
     domElement?: HTMLElement;
 
     /**
+     * Optional name for the micro app.
+     */
+    name?: string;
+
+    /**
      * Additional properties.
      */
     [key: string]: any;
@@ -47,12 +50,10 @@ export interface CreateVueMicroAppOptions {
      * The Vue component options, or a function returning Vue component options.
      */
     appOptions: MicroVueAppOptions | ((props: MicroAppProps) => MicroVueAppOptions);
-
     /**
      * Vue 3's createApp function.
      */
     createApp: CreateAppFunction<Element>;
-
     /**
      * Optional hook to perform custom modifications on the Vue app instance during mount.
      */
@@ -69,7 +70,6 @@ export interface MicroAppLifecycle {
      * The bootstrap lifecycle method.
      */
     bootstrap: () => Promise<void>;
-
     /**
      * The mount lifecycle method.
      *
@@ -77,14 +77,12 @@ export interface MicroAppLifecycle {
      * @returns A promise that resolves to the mounted Vue app instance.
      */
     mount: (props?: MicroAppProps) => Promise<App>;
-
     /**
      * The update lifecycle method.
      *
      * @param props Optional new properties to update.
      */
     update: (props?: MicroAppProps) => Promise<void>;
-
     /**
      * The unmount lifecycle method.
      */
@@ -119,9 +117,9 @@ export default function createVueMicroApp(
     }
 
     // Store the Vue app instance created during mount
-    let vueInstance: App | null = null;
+    let app: App | null = null;
 
-    return {
+    const lifeCycle: MicroAppLifecycle = {
         /**
          * Bootstrap lifecycle.
          *
@@ -136,7 +134,7 @@ export default function createVueMicroApp(
          * It resolves the appOptions (if it's a function), determines the mount element,
          * creates and mounts the Vue app, and applies any additional instance handling.
          *
-         * @param props Optional micro app properties (including an optional domElement).
+         * @param props Optional micro app properties (including an optional domElement and name).
          * @returns A promise that resolves to the mounted Vue app instance.
          */
         mount(props: MicroAppProps = {}): Promise<App> {
@@ -159,7 +157,7 @@ export default function createVueMicroApp(
                     if (typeof resolvedAppOptions.el === "string") {
                         mountEl = document.querySelector(resolvedAppOptions.el) as HTMLElement;
                         if (!mountEl) {
-                            // Create the element if it doesn't exist
+                            // Create the element if it doesn't exist (fallback to a <div>)
                             mountEl = document.createElement("div");
                             mountEl.id = resolvedAppOptions.el.replace(/^#/, "");
                             document.body.appendChild(mountEl);
@@ -168,32 +166,33 @@ export default function createVueMicroApp(
                         mountEl = resolvedAppOptions.el;
                     }
                 } else {
-                    // If no mounting target is provided, create one with a generated id.
-                    const generatedId =
-                        "micro-vue-app-" + Math.random().toString(36).substring(2, 8);
-                    mountEl = document.createElement("div");
-                    mountEl.id = generatedId;
+                    // If no mounting target is provided, create a custom element <microtsm-mfe-app>
+                    const mfeName = props.name ? props.name : "default-mfe";
+
+                    mountEl = document.createElement("microtsm-mfe-app");
+                    mountEl.setAttribute("name", mfeName);
                     document.body.appendChild(mountEl);
-                    resolvedAppOptions.el = "#" + CSS.escape(generatedId);
+
+                    resolvedAppOptions.el = `[name="${mfeName}"]`;
                 }
 
                 // Remove the 'el' property since Vue 3's createApp expects a component without it.
                 const {el, ...componentOptions} = resolvedAppOptions;
 
                 // Create the Vue app instance using the provided createApp function.
-                vueInstance = opts.createApp(componentOptions);
+                app = opts.createApp(componentOptions);
 
-                // Customize the instance if handleInstance hook is provided.
+                // Customize the instance if the handleInstance hook is provided.
                 if (opts.handleInstance) {
-                    Promise.resolve(opts.handleInstance(vueInstance, props))
+                    Promise.resolve(opts.handleInstance(app, props))
                         .then(() => {
-                            vueInstance!.mount(mountEl);
-                            resolve(vueInstance!);
+                            app!.mount(mountEl);
+                            resolve(app!);
                         })
                         .catch(reject);
                 } else {
-                    vueInstance.mount(mountEl);
-                    resolve(vueInstance);
+                    app.mount(mountEl);
+                    resolve(app);
                 }
             });
         },
@@ -207,8 +206,8 @@ export default function createVueMicroApp(
          */
         update(newProps: MicroAppProps = {}): Promise<void> {
             return new Promise((resolve) => {
-                if (vueInstance && newProps) {
-                    Object.assign(vueInstance.config.globalProperties, newProps);
+                if (app && newProps) {
+                    Object.assign(app.config.globalProperties, newProps);
                 }
                 resolve();
             });
@@ -222,12 +221,22 @@ export default function createVueMicroApp(
          */
         unmount(): Promise<void> {
             return new Promise((resolve) => {
-                if (vueInstance) {
-                    vueInstance.unmount();
+                if (app) {
+                    app.unmount();
                 }
-                vueInstance = null;
+                app = null;
                 resolve();
             });
-        }
+        },
     };
+
+    // Directly mount the app if running in standalone mode.
+    if (import.meta.env.MICROTSM_STANDALONE) {
+        lifeCycle.mount().then(() =>
+            console.log(
+                "MicroTSM Vue app mounted."
+            ));
+    }
+
+    return lifeCycle;
 }
