@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      vue:
+        specifier: ^3.5.14
+        version: 3.5.14(typescript@5.7.3)
     devDependencies:
       '@types/node':
         specifier: ^22.15.21
@@ -20,9 +24,6 @@ importers:
       vite-plugin-dts:
         specifier: ^4.5.4
         version: 4.5.4(@types/node@22.15.21)(rollup@4.41.1)(typescript@5.7.3)(vite@6.3.5(@types/node@22.15.21))
-      vue:
-        specifier: ^3.5.14
-        version: 3.5.14(typescript@5.7.3)
 
   playground/vue-mfe-app:
     dependencies:

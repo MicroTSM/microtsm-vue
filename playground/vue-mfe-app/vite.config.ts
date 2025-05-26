@@ -3,6 +3,9 @@ import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+    define: {
+        __MICROTSM_STANDALONE__: 'true'
+    },
     plugins: [vue()],
     build: {
         rollupOptions: {

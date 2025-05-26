@@ -209,10 +209,8 @@ export default function createVueMicroApp(
         },
     };
 
-    // Directly mount the app if running in standalone mode 
-    console.log("🚀 ~ createVueMicroApp ~ process.env.MICROTSM_STANDALONE: ", process.env.MICROTSM_STANDALONE);
-    console.log("🚀 ~ createVueMicroApp ~ process.env: ", process.env);
-    if (process.env.MICROTSM_STANDALONE === 'true') {
+    // Directly mount the app if running in standalone mode
+    if (window.__MICROTSM_STANDALONE__) {
         lifeCycle.mount().then(() =>
             console.log(
                 "MicroTSM Vue app mounted with Standalone mode."
@@ -220,4 +218,10 @@ export default function createVueMicroApp(
     }
 
     return lifeCycle;
+}
+
+declare global {
+    interface Window {
+        __MICROTSM_STANDALONE__: boolean
+    }
 }
