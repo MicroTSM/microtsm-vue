@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "release:patch": "pnpm build && npm version patch && npm publish --access public"
+    "release:patch": "pnpm build && npm version patch && npm publish --access public && git push --follow-tags"
   },
   "devDependencies": {
     "typescript": "~5.7.3",
