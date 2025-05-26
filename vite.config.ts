@@ -5,7 +5,7 @@ const isBuild = process.argv.includes('build')
 
 export default defineConfig({
     define: {
-        ...(isBuild ? {
+        ...(!isBuild ? {
             process: {
                 env: {
                     'MICROTSM_STANDALONE': JSON.stringify(true)
