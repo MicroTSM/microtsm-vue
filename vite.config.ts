@@ -1,13 +1,17 @@
 import {defineConfig} from 'vite'
 import dtsPlugin from "vite-plugin-dts";
 
+const isBuild = process.argv.includes('build')
+
 export default defineConfig({
     define: {
-        process: {
-            env: {
-                'MICROTSM_STANDALONE': JSON.stringify(true)
+        ...(isBuild ? {
+            process: {
+                env: {
+                    'MICROTSM_STANDALONE': JSON.stringify(true)
+                }
             }
-        }
+        } : {}),
     },
     build: {
         lib: {
