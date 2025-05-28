@@ -46,6 +46,7 @@ export interface CreateVueMicroAppOptions {
 }
 
 /**
+ * TODO: import from core package
  * Defines the standard lifecycle methods that a micro app must implement.
  * These methods manage the app's lifecycle from bootstrap to unmount.
  */
@@ -143,17 +144,17 @@ export default function createVueMicroApp(
                         }
                     }
 
-                    if (!customElements.get('microtsm-mfe-app')) {
-                        customElements.define('microtsm-mfe-app', MicroTSMMFEApp);
+                    if (!customElements.get("microtsm-mfe-app")) {
+                        customElements.define("microtsm-mfe-app", MicroTSMMFEApp);
 
                         // Add style to make custom element display as block
-                        const style = document.createElement('style');
-                        style.textContent = 'microtsm-mfe-app { display: block; }';
+                        const style = document.createElement("style");
+                        style.textContent = "microtsm-mfe-app { display: block; }";
                         document.head.appendChild(style);
                     }
 
-                    mountEl = document.createElement('microtsm-mfe-app');
-                    mountEl.setAttribute('name', mfeName);
+                    mountEl = document.createElement("microtsm-mfe-app");
+                    mountEl.setAttribute("name", mfeName);
                     document.body.appendChild(mountEl);
 
                     opts.el = `microtsm-mfe-app[name="${mfeName}"]`;
@@ -162,6 +163,7 @@ export default function createVueMicroApp(
                 // Create the Vue app instance using the root component
                 // app = opts.createApp(rootComponent, props || {});
 
+                console.log("🚀 ~ mount ~ mountEl: ", mountEl);
                 // Customize the instance if the handleInstance hook is provided.
                 if (opts.handleInstance) {
                     Promise.resolve(opts.handleInstance(app, props))
@@ -211,10 +213,11 @@ export default function createVueMicroApp(
 
     // Directly mount the app if running in standalone mode
     if (window.__MICROTSM_STANDALONE__) {
-        lifeCycle.mount().then(() =>
-            console.log(
-                "MicroTSM Vue app mounted with Standalone mode."
-            ));
+        lifeCycle
+            .mount()
+            .then(() =>
+                console.log("MicroTSM Vue app mounted with Standalone mode.")
+            );
     }
 
     return lifeCycle;
@@ -222,6 +225,6 @@ export default function createVueMicroApp(
 
 declare global {
     interface Window {
-        __MICROTSM_STANDALONE__: boolean
+        __MICROTSM_STANDALONE__: boolean;
     }
 }

@@ -4,17 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build"
+    "dev": "microtsm",
+    "serve": "microtsm serve",
+    "build": "microtsm build"
   },
   "dependencies": {
+    "@microtsm/cli": "^0.0.1",
+    "@microtsm/vue": "workspace:*",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0",
-    "@microtsm/vue": "workspace:*"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.14.0",
+    "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
     "prettier": "3.5.3",
