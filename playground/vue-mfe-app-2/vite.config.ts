@@ -4,11 +4,6 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  build: {
-    rollupOptions: {
-      external: ['@fewangsit/wangsvue-fats', '@fewangsit/wangsvue-fats'],
-    },
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

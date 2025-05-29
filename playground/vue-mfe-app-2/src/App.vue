@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {RouterLink, RouterView} from 'vue-router'
-import {onMounted} from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+import { onMounted } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
-import {Loading, useLoadingStore} from '@fewangsit/wangsvue-fats'
+import { Loading, useLoadingStore } from '@fewangsit/wangsvue-fats'
 
-const {setLoading} = useLoadingStore()
+const { setLoading } = useLoadingStore()
 
 onMounted(() => {
   setLoading(true)
@@ -16,22 +16,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <Loading/>
+  <Loading />
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125"/>
+    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!"/>
+      <HelloWorld msg="You did it!" />
 
       <nav>
-        <RouterLink to="/vue">Home</RouterLink>
-        <RouterLink to="/vue/about">About</RouterLink>
-        <RouterLink to="/vue-2/">Go to Another MFE</RouterLink>
+        <RouterLink to="/vue-2">Home</RouterLink>
+        <RouterLink to="/vue-2/about">About</RouterLink>
+        <RouterLink to="/vue">Go to Another MFE</RouterLink>
       </nav>
     </div>
   </header>
 
-  <RouterView/>
+  <RouterView />
 </template>
 
 <style scoped>
