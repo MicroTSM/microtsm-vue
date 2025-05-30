@@ -65,7 +65,7 @@ export interface MicroAppLifecycle {
      * @param props - Configuration properties for mounting
      * @returns Promise resolving to the mounted Vue app instance
      */
-    mount: (props?: MicroAppProps) => Promise<App>;
+    mount: (props?: MicroAppProps) => Promise<ReturnType<App["mount"]>>;
 
     /**
      * Updates the micro app with new properties.
@@ -114,7 +114,7 @@ export default function createVueMicroApp(
          * @param props Optional micro app properties (including an optional domElement and name).
          * @returns A promise that resolves to the mounted Vue app instance.
          */
-        mount(props: MicroAppProps = {}): Promise<App> {
+        mount(props: MicroAppProps = {}): Promise<ReturnType<App["mount"]>> {
             return new Promise((resolve, reject) => {
                 // Determine the mount element (priority: props.domElement > opts.el)
                 let mountEl: HTMLElement | null = null;
@@ -158,18 +158,19 @@ export default function createVueMicroApp(
 
                 // Create the Vue app instance using the root component
                 app = createApp(rootComponent, props || {});
+                let publicInstance: ReturnType<typeof app.mount>
 
                 // Customize the instance if the setupInstance hook is provided.
                 if (opts.setupInstance) {
                     Promise.resolve(opts.setupInstance(app, props))
                         .then(() => {
-                            app!.mount(mountEl);
-                            resolve(app!);
+                            publicInstance = app!.mount(mountEl);
+                            resolve(publicInstance!);
                         })
                         .catch(reject);
                 } else {
-                    app.mount(mountEl);
-                    resolve(app);
+                    publicInstance = app.mount(mountEl);
+                    resolve(publicInstance);
                 }
             });
         },
