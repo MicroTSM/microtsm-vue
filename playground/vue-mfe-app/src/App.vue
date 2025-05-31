@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { onMounted, watch } from 'vue'
+import { onMounted } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
 import { Loading, useLoadingStore } from '@fewangsit/wangsvue-fats'
 import router from '@/router'
@@ -14,16 +14,6 @@ onMounted(() => {
     setLoading(false)
   }, 1000)
 })
-
-watch(
-  () => router.currentRoute.value.path,
-  () => {
-    console.log(
-      '🚀 ~ file: App.vue ~ line 20 ~ watch ~ router.currentRoute.value.path',
-      router.currentRoute.value.path,
-    )
-  },
-)
 </script>
 
 <template>
