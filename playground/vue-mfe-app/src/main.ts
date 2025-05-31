@@ -4,7 +4,6 @@ import '@fewangsit/wangsvue-presets/fixedasset/style.css'
 import '@fewangsit/wangsvue-fats/style.css'
 
 import createVueMicroApp from '@microtsm/vue'
-import { createApp } from 'vue'
 import App from '@/App.vue'
 import { WangsVue } from '@fewangsit/wangsvue-fats'
 import preset from '@fewangsit/wangsvue-presets/fixedasset'

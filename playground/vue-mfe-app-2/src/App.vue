@@ -22,11 +22,10 @@ onMounted(() => {
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-
       <nav>
         <RouterLink to="/vue-2">Home</RouterLink>
         <RouterLink to="/vue-2/about">About</RouterLink>
-        <RouterLink to="/vue">Go to Another MFE</RouterLink>
+        <RouterLink to="/vue/about">Go to Another MFE</RouterLink>
       </nav>
     </div>
   </header>
