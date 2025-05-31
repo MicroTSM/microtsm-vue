@@ -1,5 +1,5 @@
-import {App, Component, createApp} from "vue";
-import {Router} from "vue-router";
+import { App, Component, createApp } from 'vue';
+import { Router } from 'vue-router';
 
 /**
  * Interface representing the properties that can be passed during lifecycle methods.
@@ -66,7 +66,7 @@ export interface MicroAppLifecycle {
      * @param props - Configuration properties for mounting
      * @returns Promise resolving to the mounted Vue app instance
      */
-    mount: (props?: MicroAppProps) => Promise<ReturnType<App["mount"]>>;
+    mount: (props?: MicroAppProps) => Promise<ReturnType<App['mount']>>;
 
     /**
      * Updates the micro app with new properties.
@@ -93,9 +93,8 @@ export interface MicroAppLifecycle {
  */
 export default function createVueMicroApp(
     rootComponent: Component,
-    opts: CreateVueMicroAppOptions = {}
-):
-    MicroAppLifecycle {
+    opts: CreateVueMicroAppOptions = {},
+): MicroAppLifecycle {
     let app: App | null = null;
     const lifeCycle: MicroAppLifecycle = {
         /**
@@ -115,27 +114,28 @@ export default function createVueMicroApp(
          * @param props Optional micro app properties (including an optional domElement and name).
          * @returns A promise that resolves to the mounted Vue app instance.
          */
-        async mount(props: MicroAppProps = {}): Promise<ReturnType<App["mount"]>> {
-            const appInstance = await new Promise<ReturnType<App["mount"]>>((resolve, reject) => {
+        async mount(props: MicroAppProps = {}): Promise<ReturnType<App['mount']>> {
+            const appInstance = await new Promise<ReturnType<App['mount']>>((resolve, reject) => {
                 // Determine the mount element (priority: props.domElement > opts.el)
                 let mountEl: HTMLElement | null = null;
                 if (props.domElement && document.body.contains(props.domElement)) {
                     mountEl = props.domElement;
                 } else if (opts.el) {
-                    if (typeof opts.el === "string") {
+                    if (typeof opts.el === 'string') {
                         mountEl = document.querySelector(opts.el) as HTMLElement;
                         if (!mountEl) {
-                            const errMessage = "❌ Failed to mount the app: The specified DOM element does not exist. " +
-                                "If `el` is provided as a query string, ensure that the element is present in your `index.html`.";
+                            const errMessage =
+                                '❌ Failed to mount the app: The specified DOM element does not exist. ' +
+                                'If `el` is provided as a query string, ensure that the element is present in your `index.html`.';
                             console.error(errMessage);
-                            reject(errMessage)
+                            reject(errMessage);
                         }
                     } else if (opts.el instanceof HTMLElement) {
                         mountEl = opts.el;
                     }
                 } else {
                     // If no mounting target is provided, create a custom element <microtsm-mfe-app>
-                    const mfeName = props.name ? props.name : "default-mfe";
+                    const mfeName = props.name ? props.name : 'default-mfe';
 
                     class MicroTSMMFEApp extends HTMLElement {
                         constructor() {
@@ -143,23 +143,23 @@ export default function createVueMicroApp(
                         }
                     }
 
-                    if (!customElements.get("microtsm-mfe-app")) {
-                        customElements.define("microtsm-application", MicroTSMMFEApp);
+                    if (!customElements.get('microtsm-mfe-app')) {
+                        customElements.define('microtsm-application', MicroTSMMFEApp);
 
                         // Add style to make custom element display as block
-                        const style = document.createElement("style");
-                        style.textContent = "microtsm-application { display: block; }";
+                        const style = document.createElement('style');
+                        style.textContent = 'microtsm-application { display: block; }';
                         document.head.appendChild(style);
                     }
 
-                    mountEl = document.createElement("microtsm-application");
-                    mountEl.setAttribute("name", mfeName);
+                    mountEl = document.createElement('microtsm-application');
+                    mountEl.setAttribute('name', mfeName);
                     document.body.appendChild(mountEl);
                 }
 
                 // Create the Vue app instance using the root component
                 app = createApp(rootComponent, props || {});
-                let publicInstance: ReturnType<typeof app.mount>
+                let publicInstance: ReturnType<typeof app.mount>;
 
                 // Customize the instance if the setupInstance hook is provided.
                 if (opts.setupInstance) {
@@ -192,13 +192,13 @@ export default function createVueMicroApp(
                 const router: Router = appInstance['$router' as keyof typeof appInstance];
 
                 if (router) {
-                    const {matched} = router.currentRoute.value;
+                    const { matched } = router.currentRoute.value;
                     if (matched.length === 0) {
                         const correctRoute = router.resolve(window.location.pathname);
                         router.currentRoute.value = {
                             ...correctRoute,
                             name: correctRoute.name ?? '',
-                        }
+                        };
                     }
                 }
             })().then();
@@ -240,11 +240,7 @@ export default function createVueMicroApp(
 
     // Directly mount the app if running in standalone mode
     if (window.__MICROTSM_STANDALONE__) {
-        lifeCycle
-            .mount()
-            .then(() =>
-                console.log("MicroTSM Vue app mounted with Standalone mode.")
-            );
+        lifeCycle.mount().then(() => console.log('MicroTSM Vue app mounted with Standalone mode.'));
     }
 
     return lifeCycle;

@@ -13,10 +13,6 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": [
-      "node",
-      "vite/client",
-      "@fewangsit/wangsvue-fats"
-    ]
+    "types": ["node", "vite/client", "@fewangsit/wangsvue-fats"]
   }
 }
