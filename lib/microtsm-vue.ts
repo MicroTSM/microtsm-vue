@@ -1,4 +1,5 @@
 import {App, Component, createApp} from "vue";
+import {Router} from "vue-router";
 
 /**
  * Interface representing the properties that can be passed during lifecycle methods.
@@ -114,8 +115,8 @@ export default function createVueMicroApp(
          * @param props Optional micro app properties (including an optional domElement and name).
          * @returns A promise that resolves to the mounted Vue app instance.
          */
-        mount(props: MicroAppProps = {}): Promise<ReturnType<App["mount"]>> {
-            return new Promise((resolve, reject) => {
+        async mount(props: MicroAppProps = {}): Promise<ReturnType<App["mount"]>> {
+            const appInstance = await new Promise<ReturnType<App["mount"]>>((resolve, reject) => {
                 // Determine the mount element (priority: props.domElement > opts.el)
                 let mountEl: HTMLElement | null = null;
                 if (props.domElement && document.body.contains(props.domElement)) {
@@ -173,6 +174,38 @@ export default function createVueMicroApp(
                     resolve(publicInstance);
                 }
             });
+
+            /**
+             * Ensures Vue Router correctly resolves routes when a micro-app is remounted.
+             *
+             * 🔹 **Why This Is Needed:**
+             * - Vue Router loses its view when the micro-app is recreated, even though the router state persists.
+             * - ES module caching means the router instance remains, but Vue's reactive system doesn't automatically refresh the view.
+             * - Manually resolving the route ensures that `<router-view>` displays the correct component upon remount.
+             *
+             * 🔹 **How It Works:**
+             * - Waits for Vue Router to be fully initialized (`router.isReady()`).
+             * - If no matching components are found (`matched.length === 0`), it manually resolves the correct route.
+             * - Updates `router.currentRoute.value` with the resolved match to ensure a fresh render.
+             */
+            (function resolveRoute() {
+                const router: Router = appInstance['$router' as keyof typeof appInstance];
+
+                if (router) {
+                    router.isReady().then(() => {
+                        let {matched, ...rest} = router.currentRoute.value;
+                        if (matched.length === 0) {
+                            matched = router.resolve({path: window.location.pathname}).matched;
+                            router.currentRoute.value = {
+                                ...rest,
+                                matched,
+                            };
+                        }
+                    })
+                }
+            })()
+
+            return appInstance;
         },
 
         /**
