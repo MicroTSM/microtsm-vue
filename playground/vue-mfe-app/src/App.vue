@@ -32,7 +32,7 @@ onMounted(() => {
     </div>
   </header>
 
-  <RouterView :key="router.currentRoute.value.path" />
+  <RouterView />
 </template>
 
 <style scoped>

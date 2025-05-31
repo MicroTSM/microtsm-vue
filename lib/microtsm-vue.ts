@@ -188,22 +188,20 @@ export default function createVueMicroApp(
              * - If no matching components are found (`matched.length === 0`), it manually resolves the correct route.
              * - Updates `router.currentRoute.value` with the resolved match to ensure a fresh render.
              */
-            (function resolveRoute() {
+            (async function resolveRoute() {
                 const router: Router = appInstance['$router' as keyof typeof appInstance];
 
                 if (router) {
-                    router.isReady().then(() => {
-                        let {matched, ...rest} = router.currentRoute.value;
-                        if (matched.length === 0) {
-                            matched = router.resolve({path: window.location.pathname}).matched;
-                            router.currentRoute.value = {
-                                ...rest,
-                                matched,
-                            };
+                    const {matched} = router.currentRoute.value;
+                    if (matched.length === 0) {
+                        const correctRoute = router.resolve(window.location.pathname);
+                        router.currentRoute.value = {
+                            ...correctRoute,
+                            name: correctRoute.name ?? '',
                         }
-                    })
+                    }
                 }
-            })()
+            })().then();
 
             return appInstance;
         },
