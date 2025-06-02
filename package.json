@@ -16,7 +16,7 @@
         "dev": "vite",
         "build:dev": "vite build --mode development",
         "build:prod": "vite build --mode production",
-        "build": "rm -r dist --force && tsc && pnpm build:dev && pnpm minify",
+        "build": "pnpm build:dev && pnpm minify",
         "release:patch": "pnpm build && npm version patch && npm publish --access public && git push --follow-tags",
         "format": "prettier . --write",
         "minify": "node scripts/minify.js"

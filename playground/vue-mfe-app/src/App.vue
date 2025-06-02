@@ -8,6 +8,8 @@ import router from '@/router'
 const { setLoading } = useLoadingStore()
 
 onMounted(() => {
+  console.log('mounted href', window.location.href)
+  console.log('mounted', router.currentRoute.value)
   setLoading(true)
 
   setTimeout(() => {

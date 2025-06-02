@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
 
     const config: UserConfig = {
         build: {
-            emptyOutDir: false,
+            emptyOutDir: true,
             lib: {
                 entry: './lib/microtsm-vue.ts',
                 name: 'MicroTSMVue',
@@ -29,17 +29,21 @@ export default defineConfig(({ mode }) => {
             },
             rollupOptions: {
                 external: ['vue'],
+                output: {
+                    banner,
+                },
             },
             // In production, minify using Terser; in development, output as is.
             minify: isProd ? 'esbuild' : false,
             // Disable source maps in prod; enable in dev for easier debugging.
             sourcemap: !isProd,
         },
-        esbuild: {
-            drop: ['console', 'debugger'],
-            legalComments: 'none',
-            banner: isProd ? banner : undefined,
-        },
+        esbuild: isProd
+            ? {
+                  drop: ['console', 'debugger'],
+                  legalComments: 'none',
+              }
+            : undefined,
         plugins: [
             !isProd
                 ? dtsPlugin({

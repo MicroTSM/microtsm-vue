@@ -9,6 +9,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      external: ['@fewangsit/wangsvue-fats', '@fewangsit/wangsvue-fats'],
+    },
+  },
   server: {
     port: 4175,
   },
