@@ -74,13 +74,13 @@ export interface MicroAppLifecycle {
      *
      * @param props - New properties to apply
      */
-    update: (props?: MicroAppProps) => Promise<void>;
+    update: (props?: MicroAppProps) => void;
 
     /**
      * Unmounts the micro app and cleans up resources.
      * Removes the app from DOM and clears the stored instance.
      */
-    unmount: () => Promise<void>;
+    unmount: () => void;
 }
 
 /**
@@ -224,7 +224,7 @@ export default function createVueMicroApp(
 
             // Customize the instance if the setupInstance hook is provided.
             await opts.setupInstance?.(app, props);
-            // resolveRoute();
+            resolveRoute();
             appInstance = app.mount(mountEl);
             isMounted = true;
             return appInstance;
@@ -237,13 +237,10 @@ export default function createVueMicroApp(
          * @param newProps Optional new properties to merge.
          * @returns A promise that resolves when the update is complete.
          */
-        update(newProps: MicroAppProps = {}): Promise<void> {
-            return new Promise((resolve) => {
-                if (app && newProps) {
-                    Object.assign(app.config.globalProperties, newProps);
-                }
-                resolve();
-            });
+        update(newProps: MicroAppProps = {}): void {
+            if (app && newProps) {
+                Object.assign(app.config.globalProperties, newProps);
+            }
         },
 
         /**
@@ -252,26 +249,22 @@ export default function createVueMicroApp(
          *
          * @returns A promise that resolves when the app is unmounted.
          */
-        unmount(): Promise<void> {
-            return new Promise((resolve) => {
-                // Here we don't call vue.unmount() because it will call the router unmount function,
-                // which leads to error navigation on Multiple Route in One Application.
-                if (app && appInstance) {
-                    if (isMounted) {
-                        callWithAsyncErrorHandling(
-                            [], // onUnmounted callbacks; we don't have access, so pass an empty array.
-                            app._instance,
-                            ErrorCodes.APP_UNMOUNT_CLEANUP,
-                        );
-                        render(null, app._container);
-                        delete app._container.__vue_app__;
-                    } else {
-                        warn(`Cannot unmount an app that is not mounted.`);
-                    }
+        unmount(): void {
+            // Here we don't call vue.unmount() because it will call the router unmount function,
+            // which leads to error navigation on Multiple Route in One Application.
+            if (app && appInstance) {
+                if (isMounted) {
+                    callWithAsyncErrorHandling(
+                        [], // onUnmounted callbacks; we don't have access, so pass an empty array.
+                        app._instance,
+                        ErrorCodes.APP_UNMOUNT_CLEANUP,
+                    );
+                    render(null, app._container);
+                    delete app._container.__vue_app__;
+                } else {
+                    warn(`Cannot unmount an app that is not mounted.`);
                 }
-
-                resolve();
-            });
+            }
         },
     };
 

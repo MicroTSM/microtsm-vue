@@ -34,7 +34,6 @@ onMounted(() => {
   </header>
 
   <RouterView />
-  <pre>{{ $router.currentRoute.value }}</pre>
 </template>
 
 <style scoped>
