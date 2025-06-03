@@ -166,7 +166,7 @@ export default function createVueMicroApp(
                 /**
                  * Handles route redirection when a route has a redirect property.
                  *
-                 * This function is needed because when mounting/remounting a micro-app,
+                 * This function is needed because, when mounting/remounting a micro-app,
                  * Vue Router's built-in redirect handling doesn't work properly. We need
                  * to manually check for and handle redirects due to the custom lifecycle.
                  *
@@ -178,17 +178,15 @@ export default function createVueMicroApp(
                     // Look for a redirect on any of the matched route records.
                     let redirectTarget: RouteLocationRaw | undefined;
                     for (const record of router.currentRoute.value.matched) {
-                        if (record.redirect != null) {
+                        // Find matched redirect with the current resolved route.
+                        if ((record.name === route.name || record.path === route.path) && record.redirect != null) {
                             // If redirect is a function, call it with the resolved route.
-                            if (typeof record.redirect === 'function') {
-                                redirectTarget = record.redirect(route);
-                            } else {
-                                redirectTarget = record.redirect;
-                            }
+                            redirectTarget =
+                                typeof record.redirect === 'function' ? record.redirect(route) : record.redirect;
                             break;
                         }
                     }
-
+``
                     if (redirectTarget) {
                         router.replace(redirectTarget);
                     }
