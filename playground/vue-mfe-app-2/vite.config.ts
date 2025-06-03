@@ -11,7 +11,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ['@fewangsit/wangsvue-fats', '@fewangsit/wangsvue-fats'],
+      external: ['@fewangsit/wangsvue-fats', 'vue-router'],
     },
   },
   server: {

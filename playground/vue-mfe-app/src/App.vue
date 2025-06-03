@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import HelloWorld from './components/HelloWorld.vue'
 import { Loading, useLoadingStore } from '@fewangsit/wangsvue-fats'
@@ -35,6 +34,7 @@ onMounted(() => {
   </header>
 
   <RouterView />
+  <pre>{{ $router.currentRoute.value }}</pre>
 </template>
 
 <style scoped>

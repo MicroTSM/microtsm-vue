@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     rollupOptions: {
-      external: ['@fewangsit/wangsvue-fats', '@fewangsit/wangsvue-fats'],
+      external: ['@fewangsit/wangsvue-fats', 'vue-router'],
     },
   },
   resolve: {
