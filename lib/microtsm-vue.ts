@@ -224,7 +224,7 @@ export default function createVueMicroApp(
 
             // Customize the instance if the setupInstance hook is provided.
             await opts.setupInstance?.(app, props);
-            resolveRoute();
+            // resolveRoute();
             appInstance = app.mount(mountEl);
             isMounted = true;
             return appInstance;
