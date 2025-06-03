@@ -1,5 +1,5 @@
-import { App, callWithAsyncErrorHandling, Component, createApp, ErrorCodes, render, warn } from 'vue';
-import { RouteLocationRaw, Router } from 'vue-router';
+import { App, Component, createApp } from 'vue';
+import { Router } from 'vue-router';
 
 /**
  * Interface representing the properties that can be passed during lifecycle methods.
@@ -96,8 +96,6 @@ export default function createVueMicroApp(
     opts: CreateVueMicroAppOptions = {},
 ): MicroAppLifecycle {
     let app: App | null = null;
-    let appInstance: ReturnType<App['mount']> | null = null;
-    let isMounted = false;
 
     const lifeCycle: MicroAppLifecycle = {
         /**
@@ -162,72 +160,28 @@ export default function createVueMicroApp(
             app = createApp(rootComponent, props || {});
 
             /**
-             * Handles route redirection when a route has a redirect property.
+             * Updates Vue Router's history location to match the current URL.
              *
-             * This function is needed because, when mounting/remounting a micro-app,
-             * Vue Router's built-in redirect handling doesn't work properly. We need
-             * to manually check for and handle redirects due to the custom lifecycle.
+             * This is required because vue-router maintains its own history state
+             * when used as an external singleton module. Without this update,
+             * the router may still reference the previous micro-app's location,
+             * causing incorrect route resolution and unexpected navigation behavior
+             * like unwanted redirects back to the previous location.
              *
-             * @param router - Vue Router instance to handle redirects
-             */
-            function redirectRoute(router: Router) {
-                const route = router.currentRoute.value;
-
-                // Look for a redirect on any of the matched route records.
-                let redirectTarget: RouteLocationRaw | undefined;
-                for (const record of router.currentRoute.value.matched) {
-                    // Find matched redirect with the current resolved route.
-                    if ((record.name === route.name || record.path === route.path) && record.redirect != null) {
-                        // If redirect is a function, call it with the resolved route.
-                        redirectTarget =
-                            typeof record.redirect === 'function' ? record.redirect(route) : record.redirect;
-                        break;
-                    }
-                }
-
-                if (redirectTarget) {
-                    router.replace(redirectTarget);
-                }
-            }
-
-            /**
-             * Ensures Vue Router correctly resolves routes when a micro-app is remounted.
-             *
-             *
-             * @internal Used by the mount lifecycle method to fix router state after app remount.
              * @remarks
-             * When a micro-app is recreated during remount, Vue Router loses its view but retains
-             * the router state. This function manually resolves the current route and updates the
-             * router to ensure components display correctly.
-             *
-             * The function:
-             * 1. Gets the router instance from the app's global properties
-             * 2. Resolves the current pathname to get the proper route match
-             * 3. Updates router.currentRoute with the resolved match
-             * 4. Handles any route redirect via redirectRoute()
+             * Only executes if a Vue app instance exists with router configured.
              */
-            function resolveRoute() {
+            const setRouterHistoryLocation = () => {
                 if (app) {
-                    const router: Router = app.config.globalProperties.$router as Router;
-
-                    if (router) {
-                        const correctRoute = router.resolve(location.pathname);
-                        router.currentRoute.value = {
-                            ...correctRoute,
-                            name: correctRoute.name ?? '',
-                        };
-
-                        redirectRoute(router);
-                    }
+                    const router: Router = app.config.globalProperties.$router;
+                    router?.replace(location.pathname);
                 }
-            }
+            };
 
             // Customize the instance if the setupInstance hook is provided.
             await opts.setupInstance?.(app, props);
-            // resolveRoute();
-            appInstance = app.mount(mountEl);
-            isMounted = true;
-            return appInstance;
+            setRouterHistoryLocation();
+            return app.mount(mountEl);
         },
 
         /**
@@ -250,20 +204,9 @@ export default function createVueMicroApp(
          * @returns A promise that resolves when the app is unmounted.
          */
         unmount(): void {
-            // Here we don't call vue.unmount() because it will call the router unmount function,
-            // which leads to error navigation on Multiple Route in One Application.
-            if (app && appInstance) {
-                if (isMounted) {
-                    callWithAsyncErrorHandling(
-                        [], // onUnmounted callbacks; we don't have access, so pass an empty array.
-                        app._instance,
-                        ErrorCodes.APP_UNMOUNT_CLEANUP,
-                    );
-                    render(null, app._container);
-                    delete app._container.__vue_app__;
-                } else {
-                    warn(`Cannot unmount an app that is not mounted.`);
-                }
+            if (app) {
+                app.unmount();
+                app = null;
             }
         },
     };

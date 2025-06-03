@@ -13,9 +13,10 @@
         "import": "./dist/microtsm-vue.js"
     },
     "scripts": {
-        "dev": "vite",
-        "build:dev": "vite build --mode development",
-        "build:prod": "vite build --mode production",
+        "dev": "microtsm",
+        "serve": "microtsm serve",
+        "build:dev": "microtsm build --mode development",
+        "build:prod": "microtsm build --mode production",
         "build": "pnpm build:dev && pnpm minify",
         "release:patch": "pnpm build && npm version patch && npm publish --access public && git push --follow-tags",
         "format": "prettier . --write",

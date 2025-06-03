@@ -1,4 +1,4 @@
-import { defineConfig, UserConfig } from 'vite';
+import { defineConfig, UserConfig } from '@microtsm/cli';
 import dtsPlugin from 'vite-plugin-dts';
 
 const banner = `/*
@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
                 fileName: isProd ? 'microtsm-vue.prod' : 'microtsm-vue',
             },
             rollupOptions: {
+                input: './lib/microtsm-vue.ts',
                 external: ['vue'],
                 output: {
                     banner,
