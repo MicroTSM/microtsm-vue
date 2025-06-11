@@ -174,7 +174,7 @@ export default function createVueMicroApp(
             const setRouterHistoryLocation = () => {
                 if (app) {
                     const router: Router = app.config.globalProperties.$router;
-                    router?.replace(location.pathname);
+                    router?.replace(location.href.replace(location.origin, ''));
                 }
             };
 
