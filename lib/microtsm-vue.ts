@@ -97,6 +97,53 @@ export default function createVueMicroApp(
 ): MicroAppLifecycle {
     let app: App | null = null;
 
+    /**
+     * Handles internal navigation events by determining if the navigation is within the same origin
+     * and shares a common base path. If so, it performs a router replacement to the target URL.
+     *
+     * @param event - A custom event containing navigation details.
+     * @param event.detail - The detail object of the custom event.
+     * @param event.detail.to - The target URL of the navigation.
+     * @param event.detail.from - The source URL of the navigation.
+     *
+     * @remarks
+     * This function compares the `pathname` segments of the `to` and `from` URLs to determine
+     * if they share a common base path. If they do, it uses the Vue Router's `replace` method
+     * to navigate to the target URL without reloading the page.
+     *
+     * @example
+     * ```typescript
+     * const event = new CustomEvent('navigate', {
+     *   detail: {
+     *     to: new URL('https://example.com/path/to/page'),
+     *     from: new URL('https://example.com/path/to/another')
+     *   }
+     * });
+     * handleInternalNavigation(event);
+     * ```
+     */
+    const handleInternalNavigation = ({ detail }: CustomEvent<{ to: URL; from: URL }>) => {
+        const { to, from } = detail;
+        const router = app?.config.globalProperties.$router as Router;
+
+        if (to.origin === from.origin) {
+            const toSegments = to.pathname.split('/');
+            const fromSegments = from.pathname.split('/');
+
+            let commonBasePath = true;
+            for (let i = 0; i < Math.min(toSegments.length, fromSegments.length); i++) {
+                if (toSegments[i] !== fromSegments[i]) {
+                    commonBasePath = false;
+                    break;
+                }
+            }
+
+            if (commonBasePath && router.currentRoute.value.fullPath !== to.pathname) {
+                router?.replace(to.href.replace(to.origin, ''));
+            }
+        }
+    };
+
     const lifeCycle: MicroAppLifecycle = {
         /**
          * Bootstrap lifecycle.
@@ -178,6 +225,8 @@ export default function createVueMicroApp(
                 }
             };
 
+            window.addEventListener('microtsm:navigation-event', handleInternalNavigation);
+
             // Customize the instance if the setupInstance hook is provided.
             await opts.setupInstance?.(app, props);
             setRouterHistoryLocation();
@@ -205,6 +254,7 @@ export default function createVueMicroApp(
          */
         unmount(): void {
             if (app) {
+                window.removeEventListener('microtsm:navigation-event', handleInternalNavigation);
                 app.unmount();
                 app = null;
             }
@@ -222,5 +272,12 @@ export default function createVueMicroApp(
 declare global {
     interface Window {
         __MICROTSM_STANDALONE__: boolean;
+    }
+
+    interface WindowEventMap {
+        'microtsm:navigation-event': CustomEvent<{
+            to: URL;
+            from: URL;
+        }>;
     }
 }
