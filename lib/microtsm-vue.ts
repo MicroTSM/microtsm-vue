@@ -125,21 +125,32 @@ export default function createVueMicroApp(
     const handleInternalNavigation = ({ detail }: CustomEvent<{ to: URL; from: URL }>) => {
         const { to, from } = detail;
         const router = app?.config.globalProperties.$router as Router;
+        if (!router) return;
 
-        if (to.origin === from.origin) {
-            const toSegments = to.pathname.split('/');
-            const fromSegments = from.pathname.split('/');
+        // 1. Only process same-origin links
+        if (to.origin !== from.origin) return;
 
-            let commonBasePath = true;
-            for (let i = 0; i < Math.min(toSegments.length, fromSegments.length); i++) {
-                if (toSegments[i] !== fromSegments[i]) {
-                    commonBasePath = false;
-                    break;
-                }
+        // 2. Break paths into segments, excluding empty ones
+        const toSegments = to.pathname.split('/').filter(Boolean);
+        const fromSegments = from.pathname.split('/').filter(Boolean);
+
+        // 3. Find the longest shared path prefix
+        const sharedSegments: string[] = [];
+        for (let i = 0; i < Math.min(toSegments.length, fromSegments.length); i++) {
+            if (toSegments[i] === fromSegments[i]) {
+                sharedSegments.push(toSegments[i]);
+            } else {
+                break;
             }
+        }
 
-            if (commonBasePath && router.currentRoute.value.fullPath !== to.pathname) {
-                router?.replace(to.href.replace(to.origin, ''));
+        // 4. Require at least 1 common segment to consider it same base path
+        if (sharedSegments.length > 0) {
+            const currentPath = router.currentRoute.value.fullPath;
+            const targetPath = to.href.replace(to.origin, '');
+
+            if (currentPath !== targetPath) {
+                router.replace(targetPath);
             }
         }
     };
