@@ -98,60 +98,24 @@ export default function createVueMicroApp(
     let app: App | null = null;
 
     /**
-     * Handles internal navigation events by determining if the navigation is within the same origin
-     * and shares a common base path. If so, it performs a router replacement to the target URL.
+     * When cross module navigation trigerred by function navigateToUrl from `microtsm` package, each module router should update its own current route
+     * Handles internal navigation by replacing the current route with the target route.
      *
      * @param event - A custom event containing navigation details.
      * @param event.detail - The detail object of the custom event.
-     * @param event.detail.to - The target URL of the navigation.
+     * @param event.detail.to - The target URL to navigate to.
      * @param event.detail.from - The source URL of the navigation.
-     *
-     * @remarks
-     * This function compares the `pathname` segments of the `to` and `from` URLs to determine
-     * if they share a common base path. If they do, it uses the Vue Router's `replace` method
-     * to navigate to the target URL without reloading the page.
-     *
-     * @example
-     * ```typescript
-     * const event = new CustomEvent('navigate', {
-     *   detail: {
-     *     to: new URL('https://example.com/path/to/page'),
-     *     from: new URL('https://example.com/path/to/another')
-     *   }
-     * });
-     * handleInternalNavigation(event);
-     * ```
      */
     const handleInternalNavigation = ({ detail }: CustomEvent<{ to: URL; from: URL }>) => {
-        const { to, from } = detail;
+        const { to } = detail;
         const router = app?.config.globalProperties.$router as Router;
         if (!router) return;
 
-        // 1. Only process same-origin links
-        if (to.origin !== from.origin) return;
+        const currentPath = router.currentRoute.value.fullPath;
+        const targetPath = to.href.replace(to.origin, '');
 
-        // 2. Break paths into segments, excluding empty ones
-        const toSegments = to.pathname.split('/').filter(Boolean);
-        const fromSegments = from.pathname.split('/').filter(Boolean);
-
-        // 3. Find the longest shared path prefix
-        const sharedSegments: string[] = [];
-        for (let i = 0; i < Math.min(toSegments.length, fromSegments.length); i++) {
-            if (toSegments[i] === fromSegments[i]) {
-                sharedSegments.push(toSegments[i]);
-            } else {
-                break;
-            }
-        }
-
-        // 4. Require at least 1 common segment to consider it same base path
-        if (sharedSegments.length > 0) {
-            const currentPath = router.currentRoute.value.fullPath;
-            const targetPath = to.href.replace(to.origin, '');
-
-            if (currentPath !== targetPath) {
-                router.replace(targetPath);
-            }
+        if (currentPath !== targetPath) {
+            router.replace(targetPath);
         }
     };
 
